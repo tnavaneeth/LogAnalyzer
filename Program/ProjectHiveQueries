@@ -1,0 +1,88 @@
+
+HIVE ::: QUERIES TO RETRIEVE TOP ERRORS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Table Creation to load Error Data :-
+==================================== 
+CREATE TABLE ERRORLIST(
+logdate String,
+category String,
+moduleName String,
+error String)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
+LOCATION '/user/hive/warehouse/errortb';
+
+To load Pig output into hive table :-
+=====================================
+LOAD DATA INPATH '/home/mapr/output/project/Pig/ERROR_LIST/part-m-00000' OVERWRITE INTO TABLE ERRORLIST;
+
+To display all errors with their count in descending order :-
+=============================================================
+SELECT ERROR, MAX(CNT) FROM(SELECT ERROR, COUNT(ERROR) AS CNT FROM ERRORLIST GROUP BY ERROR) E GROUP BY ERROR;	
+
+(or)
+
+To display top error :-
+=======================
+SELECT ERROR, COUNT(ERROR) AS CNT FROM ERRORLIST GROUP BY ERROR ORDER BY CNT DESC LIMIT 1;
+
+Answer (1):-
+============
+ARRAY_OUT_OF_INDEX	10
+MEMORY_EXECPTION	6
+NULL_POINTER_EXECPTION	4
+UNKNOWN_COMPRESSION_FORMAT	10
+WRONG_DATA	4
+Time taken: 65.778 seconds
+
+(or)
+
+Answer (2):-
+============
+ARRAY_OUT_OF_INDEX	10			
+
+HIVE ::: QUERIES TO RETRIEVE LONG RUNNING PROGRAM
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Table Creation to load INFO Data :-
+==================================== 
+CREATE TABLE INFOLIST(
+logdate String,
+category String,
+moduleName String,
+remarks String,
+runtime String)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
+LOCATION '/user/hive/warehouse/infotb';
+
+To load Pig output into hive table :-
+=====================================
+LOAD DATA INPATH '/home/mapr/output/project/Pig/INFO_LIST/part-m-00000' OVERWRITE INTO TABLE INFOLIST;
+
+To display long running modules :-
+===================================
+SELECT LOGDATE, MODULENAME, (CAST(CAST(SUBSTRING(RUNTIME,1,2) AS INT) * 60 * 60 + CAST(SUBSTRING(RUNTIME,4,2) AS INT) * 60 + CAST(SUBSTRING(RUNTIME,7,2) AS INT) AS INT)) AS DURATIONINSECS FROM INFOLIST ORDER BY DURATIONINSECS DESC;
+
+Results :-
+==========
+12-DEC-2013	MODULEH	56110
+12-DEC-2013	MODULEB	45950
+13-DEC-2013	MODULEB	45950
+13-DEC-2013	MODULEA	41140
+12-DEC-2013	MODULEE	41140
+12-DEC-2013	MODULEA	36920
+13-DEC-2013	MODULED	34520
+12-DEC-2013	MODULEC	33320
+13-DEC-2013	MODULEE	30912
+13-DEC-2013	MODULER	27950
+12-DEC-2013	MODULER	27950
+12-DEC-2013	MODULEF	18930
+13-DEC-2013	MODULEF	12920
+13-DEC-2013	MODULEF	9312
+13-DEC-2013	MODULEH	5703
+13-DEC-2013	MODULEG	3920
+12-DEC-2013	MODULEG	3920
+13-DEC-2013	MODULEI	2120
+12-DEC-2013	MODULEI	920
+Time taken: 24.965 seconds
+
